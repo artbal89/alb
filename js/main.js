@@ -184,9 +184,9 @@ $(function () {
         success: "valid",
         submitHandler: function () {
             $.ajax({
-                url: 'https://artbal89.github.io/alb/mailer/contact.php', // Replace with your PHP script URL
+                url: 'https://artbal89.github.io/alb//mailer/contact.php', // Path to your PHP script
                 type: 'POST',
-                dataType: 'json',
+                dataType: 'json', // Expect JSON response from the server
                 data: {
                     name: $('input[name="name"]').val(),
                     tel: $('input[name="tel"]').val(),
@@ -196,20 +196,24 @@ $(function () {
                 },
                 success: function (response) {
                     if (response.success) {
-                        $('.alert-success').fadeIn();
+                        $('.alert-success').fadeIn().text(response.message);
+                        $('.alert-error').hide();
                         $('#cform')[0].reset();
                     } else {
                         $('.alert-error').fadeIn().text(response.message || "An error occurred.");
+                        $('.alert-success').hide();
                     }
                 },
                 error: function (xhr, textStatus, errorThrown) {
                     console.error("AJAX error:", textStatus, errorThrown);
-                    $('.alert-error').fadeIn().text("An unexpected error occurred.");
+                    $('.alert-error').fadeIn().text("An unexpected error occurred. Please try again later.");
+                    $('.alert-success').hide();
                 },
             });
         },
     });
 });
+
 
 
 	
