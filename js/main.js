@@ -184,7 +184,7 @@ $(function () {
         success: "valid",
         submitHandler: function () {
             $.ajax({
-                url: 'https://github.com/artbal89/alb/blob/main/mailer/contact.php', // Replace with your PHP script URL
+                url: 'https://artbal89.github.io/alb/mailer/contact.php', // Replace with your PHP script URL
                 type: 'POST',
                 dataType: 'json',
                 data: {
