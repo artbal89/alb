@@ -313,39 +313,38 @@
     <div class="row">
         <div class="col col-m-12 col-t-6 col-d-6 animated">
             <div class="value">
-                <input type="text" name="name" placeholder="Name *" />
+                <input type="text" name="name" placeholder="Name *" required />
             </div>
         </div>
         <div class="col col-m-12 col-t-6 col-d-6 animated">
             <div class="value">
-                <input type="tel" name="tel" placeholder="Phone *" />
+                <input type="tel" name="tel" placeholder="Phone *" required />
             </div>
         </div>
         <div class="col col-m-12 col-t-6 col-d-6 animated">
             <div class="value">
-                <input type="text" name="email" placeholder="Email *" />
+                <input type="email" name="email" placeholder="Email *" required />
             </div>
         </div>
         <div class="col col-m-12 col-t-6 col-d-6 animated">
             <div class="value">
-                <input type="text" name="subject" placeholder="Subject *" />
+                <input type="text" name="subject" placeholder="Subject *" required />
             </div>
         </div>
         <div class="col col-m-12 col-t-12 col-d-12 animated">
             <div class="value">
-                <textarea name="message" placeholder="Message"></textarea>
+                <textarea name="message" placeholder="Message *" required></textarea>
             </div>
         </div>
         <div class="col col-m-12 col-t-12 col-d-12 animated">
-            <!-- Changed to <button> for proper submission -->
             <button type="submit" class="btn">Send Message</button>
         </div>
     </div>
 </form>
-<div class="alert-success" style="display:none;">Your message has been sent!</div>
-						<div class="alert-success">
-							<p>Thanks, your message is sent successfully. We will contact you shortly!</p>
-						</div>
+<div class="alert-success" style="display: none;">Thanks, your message is sent successfully. We will contact you shortly!</div>
+<div class="alert-error" style="display: none;">An error occurred while submitting the form.</div>
+
+
 					</div>
 				</div>
 			</div>

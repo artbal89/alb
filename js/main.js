@@ -172,54 +172,45 @@ $(function () {
 	});
 	
 	/* Validate contact form */
-	$("#cform").validate({
-    rules: {
-        name: {
-            required: true
+	$(document).ready(function () {
+    $("#cform").validate({
+        rules: {
+            name: { required: true },
+            tel: { required: true },
+            email: { required: true, email: true },
+            subject: { required: true },
+            message: { required: true },
         },
-        tel: {
-            required: true
+        success: "valid",
+        submitHandler: function () {
+            $.ajax({
+                url: 'https://github.com/artbal89/alb/blob/main/mailer/contact.php', // Replace with your PHP script URL
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    name: $('input[name="name"]').val(),
+                    tel: $('input[name="tel"]').val(),
+                    email: $('input[name="email"]').val(),
+                    subject: $('input[name="subject"]').val(),
+                    message: $('textarea[name="message"]').val(),
+                },
+                success: function (response) {
+                    if (response.success) {
+                        $('.alert-success').fadeIn();
+                        $('#cform')[0].reset();
+                    } else {
+                        $('.alert-error').fadeIn().text(response.message || "An error occurred.");
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.error("AJAX error:", textStatus, errorThrown);
+                    $('.alert-error').fadeIn().text("An unexpected error occurred.");
+                },
+            });
         },
-        email: {
-            required: true,
-            email: true
-        },
-        subject: {
-            required: true
-        },
-        message: {
-            required: true
-        }
-    },
-    success: "valid",
-    submitHandler: function(form) {
-        // AJAX request
-        $.ajax({
-            url: 'mailer/contact.php',
-            type: 'post',
-            dataType: 'json',
-            data: $(form).serialize(), // Automatically serializes all form fields
-            beforeSend: function() {
-                console.log("Sending data...");
-            },
-            complete: function() {
-                console.log("Request completed.");
-            },
-            success: function(data) {
-                if (data.success) {
-                    $('#cform').fadeOut(); // Hide form
-                    $('.alert-success').delay(1000).fadeIn(); // Show success message
-                } else {
-                    alert("An error occurred: " + (data.error || "Unknown error."));
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error("Error: " + error);
-                alert("An error occurred while submitting the form.");
-            }
-        });
-    }
+    });
 });
+
 
 	
 	/* Validate contact form */

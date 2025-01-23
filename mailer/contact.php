@@ -1,5 +1,15 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Content-Type: application/json");
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Enable debugging
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+
     // Sanitize inputs
     $name = trim(htmlspecialchars($_POST['name'] ?? '', ENT_QUOTES, 'UTF-8'));
     $email = trim(htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8'));
@@ -7,123 +17,68 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $subject = trim(htmlspecialchars($_POST['subject'] ?? '', ENT_QUOTES, 'UTF-8'));
     $message = trim(htmlspecialchars($_POST['message'] ?? '', ENT_QUOTES, 'UTF-8'));
 
-    // Check for empty fields
+    // Validate inputs
     if (empty($name) || empty($tel) || empty($email) || empty($subject) || empty($message)) {
-        echo json_encode(['success' => false, 'error' => 'All fields are required.']);
+        echo json_encode(['success' => false, 'message' => 'All fields are required.']);
         exit;
     }
 
-    // Validate email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo json_encode(['success' => false, 'error' => 'Invalid email address.']);
+        echo json_encode(['success' => false, 'message' => 'Invalid email address.']);
         exit;
     }
 
-    // Validate phone number (example regex for numeric values, customize as needed)
     if (!preg_match('/^\+?[0-9]{10,15}$/', $tel)) {
-        echo json_encode(['success' => false, 'error' => 'Invalid phone number.']);
+        echo json_encode(['success' => false, 'message' => 'Invalid phone number.']);
         exit;
     }
 
-    // Load previous submissions
-    $submissions = loadSubmissions();
-
-    // Time frame for checking repeated submissions (in seconds)
-    $timeFrame = 3600; // 1 hour
-    $currentTime = time();
-
-    // Check for repeated submissions
-    foreach ($submissions as $submission) {
-        if (
-            $submission['email'] === $email &&
-            ($currentTime - $submission['timestamp']) < $timeFrame
-        ) {
-            addToBlacklist($email);
-            echo json_encode(['success' => false, 'error' => 'You have already submitted a request recently.']);
-            exit;
-        }
-    }
-
-    // Admin email
+    // Send email to admin
     $toAdmin = "balingitartchristian@gmail.com";
-    $messageAdmin = generateAdminMessage($name, $tel, $email, $message);
+    $subjectAdmin = "Transfers Request: $name";
+    $messageAdmin = "
+    <html>
+    <head>
+      <title>alb Inquiry</title>
+    </head>
+    <body>
+      <h2>New Inquiry from $name</h2>
+      <p><strong>Phone:</strong> $tel</p>
+      <p><strong>Email:</strong> $email</p>
+      <p><strong>Message:</strong></p>
+      <p>$message</p>
+    </body>
+    </html>";
     $headersAdmin = "From: $name <$email>\r\n";
     $headersAdmin .= "Reply-To: $email\r\n";
     $headersAdmin .= "MIME-Version: 1.0\r\n";
     $headersAdmin .= "Content-Type: text/html; charset=UTF-8\r\n";
 
-    $adminEmailSent = mail($toAdmin, "Transfers Request: $name", $messageAdmin, $headersAdmin);
+    $adminEmailSent = mail($toAdmin, $subjectAdmin, $messageAdmin, $headersAdmin);
 
-    // User confirmation email
-    $toUser = $email;
+    // Confirmation email to user
     $subjectUser = "Confirmation";
-    $messageUser = generateUserConfirmation($name);
-    $headersUser = "From: alb <no-reply@alb.com>\r\n";
+    $messageUser = "
+    <html>
+    <body>
+      <h2>Thank You, $name!</h2>
+      <p>We have received your request. Our team will contact you shortly.</p>
+    </body>
+    </html>";
+    $headersUser = "From: Costa Palawan Resort <no-reply@costapalawanresort.com>\r\n";
     $headersUser .= "MIME-Version: 1.0\r\n";
     $headersUser .= "Content-Type: text/html; charset=UTF-8\r\n";
 
-    $userEmailSent = mail($toUser, $subjectUser, $messageUser, $headersUser);
+    $userEmailSent = mail($email, $subjectUser, $messageUser, $headersUser);
 
-    // Response
+    // Respond to the AJAX request
     if ($adminEmailSent && $userEmailSent) {
-        echo json_encode(['success' => true, 'message' => 'Your request has been sent successfully.']);
+        echo json_encode(['success' => true, 'message' => 'Your message has been sent successfully.']);
     } else {
-        error_log("Email sending failed for $email");
-        echo json_encode(['success' => false, 'error' => 'An error occurred while sending your request.']);
+        echo json_encode(['success' => false, 'message' => 'Failed to send the email.']);
     }
     exit;
-}
-
-// Generate admin email message
-function generateAdminMessage($name, $tel, $email, $message) {
-    return "
-<html>
-<head>
-  <title>alb Inquiry: $name</title>
-</head>
-<body style='font-family: Arial, sans-serif; background-color: #434753;'>
-  <div style='max-width: 80%; margin: 0 auto; background-color: #222; color: #ffffff; padding: 20px;'>
-    <h2>alb Inquiry</h2>
-    <table>
-      <tr><td><strong>Name:</strong></td><td>$name</td></tr>
-      <tr><td><strong>Telephone:</strong></td><td>$tel</td></tr>
-      <tr><td><strong>Email:</strong></td><td>$email</td></tr>
-    </table>
-    <p style='margin: 20px 0;'>$message</p>
-  </div>
-</body>
-</html>";
-}
-
-// Generate user confirmation email
-function generateUserConfirmation($name) {
-    return "
-<html>
-<head></head>
-<body style='font-family: Arial, sans-serif; background-color: #434753;'>
-  <div style='max-width: 600px; margin: 0 auto; background-color: #222; color: #ffffff; padding: 20px;'>
-    <h2>Thank You, $name!</h2>
-    <p>We have received your inquiry. Our team will contact you shortly to confirm the details.</p>
-  </div>
-</body>
-</html>";
-}
-
-// Load previous submissions
-function loadSubmissions() {
-    $file = "submissions.json";
-    if (file_exists($file)) {
-        $data = file_get_contents($file);
-        return $data ? json_decode($data, true) : [];
-    }
-    return [];
-}
-
-// Add email to the blacklist
-function addToBlacklist($email) {
-    $file = "blacklist.json";
-    $blacklist = file_exists($file) ? json_decode(file_get_contents($file), true) : [];
-    $blacklist[] = $email;
-    file_put_contents($file, json_encode($blacklist));
+} else {
+    echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
 }
 ?>
