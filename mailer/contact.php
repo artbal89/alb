@@ -9,19 +9,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Check for empty fields
     if (empty($name) || empty($tel) || empty($email) || empty($subject) || empty($message)) {
-        header("Location: https://artbal89.github.io/alb?error=empty");
+        echo json_encode(['success' => false, 'error' => 'All fields are required.']);
         exit;
     }
 
     // Validate email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        header("Location: https://artbal89.github.io/alb?error=invalid_email");
+        echo json_encode(['success' => false, 'error' => 'Invalid email address.']);
         exit;
     }
 
     // Validate phone number (example regex for numeric values, customize as needed)
     if (!preg_match('/^\+?[0-9]{10,15}$/', $tel)) {
-        header("Location: https://artbal89.github.io/alb?error=invalid_tel");
+        echo json_encode(['success' => false, 'error' => 'Invalid phone number.']);
         exit;
     }
 
@@ -33,22 +33,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $currentTime = time();
 
     // Check for repeated submissions
-    $blacklisted = false;
     foreach ($submissions as $submission) {
         if (
             $submission['email'] === $email &&
             ($currentTime - $submission['timestamp']) < $timeFrame
         ) {
-            $blacklisted = true;
-            break;
+            addToBlacklist($email);
+            echo json_encode(['success' => false, 'error' => 'You have already submitted a request recently.']);
+            exit;
         }
-    }
-
-    // If blacklisted, add email to blacklist and stop processing
-    if ($blacklisted) {
-        addToBlacklist($email);
-        header("Location: https://artbal89.github.io/alb?error=spam");
-        exit;
     }
 
     // Admin email
@@ -65,18 +58,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $toUser = $email;
     $subjectUser = "Confirmation";
     $messageUser = generateUserConfirmation($name);
-    $headersUser = "From: Costa Palawan Resort <no-reply@costapalawanresort.com>\r\n";
+    $headersUser = "From: alb <no-reply@alb.com>\r\n";
     $headersUser .= "MIME-Version: 1.0\r\n";
     $headersUser .= "Content-Type: text/html; charset=UTF-8\r\n";
 
     $userEmailSent = mail($toUser, $subjectUser, $messageUser, $headersUser);
 
-    // Redirect after submission
+    // Response
     if ($adminEmailSent && $userEmailSent) {
-        header("Location: https://artbal89.github.io/alb");
+        echo json_encode(['success' => true, 'message' => 'Your request has been sent successfully.']);
     } else {
-        error_log("Email sending failed for $email"); // Log error for admin review
-        header("Location: https://artbal89.github.io/alb?error=mail");
+        error_log("Email sending failed for $email");
+        echo json_encode(['success' => false, 'error' => 'An error occurred while sending your request.']);
     }
     exit;
 }
@@ -110,7 +103,7 @@ function generateUserConfirmation($name) {
 <body style='font-family: Arial, sans-serif; background-color: #434753;'>
   <div style='max-width: 600px; margin: 0 auto; background-color: #222; color: #ffffff; padding: 20px;'>
     <h2>Thank You, $name!</h2>
-    <p>We have received your transfer request. Our team will contact you shortly to confirm the details.</p>
+    <p>We have received your inquiry. Our team will contact you shortly to confirm the details.</p>
   </div>
 </body>
 </html>";

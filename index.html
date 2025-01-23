@@ -308,38 +308,41 @@
 						<div class="title">Contact Me</div>
 					</div>
 					<div class="contact-form">
+						
 						<form id="cform" method="post">
-							<div class="row">
-								<div class="col col-m-12 col-t-6 col-d-6 animated">
-									<div class="value">
-										<input type="text" name="name" placeholder="Name *" />
-									</div>
-								</div>
-								<div class="col col-m-12 col-t-6 col-d-6 animated">
-									<div class="value">
-										<input type="tel" name="tel" placeholder="Phone *" />
-									</div>
-								</div>
-								<div class="col col-m-12 col-t-6 col-d-6 animated">
-									<div class="value">
-										<input type="text" name="email" placeholder="Email *" />
-									</div>
-								</div>
-								<div class="col col-m-12 col-t-6 col-d-6 animated">
-									<div class="value">
-										<input type="text" name="subject" placeholder="Subject *" />
-									</div>
-								</div>
-								<div class="col col-m-12 col-t-12 col-d-12 animated">
-									<div class="value">
-										<textarea name="message" placeholder="Message"></textarea>
-									</div>
-								</div>
-								<div class="col col-m-12 col-t-12 col-d-12 animated">
-									<a href="#" class="btn" onclick="$('#cform').submit(); return false;">Send Message</a>
-								</div>
-							</div>
-						</form>
+    <div class="row">
+        <div class="col col-m-12 col-t-6 col-d-6 animated">
+            <div class="value">
+                <input type="text" name="name" placeholder="Name *" />
+            </div>
+        </div>
+        <div class="col col-m-12 col-t-6 col-d-6 animated">
+            <div class="value">
+                <input type="tel" name="tel" placeholder="Phone *" />
+            </div>
+        </div>
+        <div class="col col-m-12 col-t-6 col-d-6 animated">
+            <div class="value">
+                <input type="text" name="email" placeholder="Email *" />
+            </div>
+        </div>
+        <div class="col col-m-12 col-t-6 col-d-6 animated">
+            <div class="value">
+                <input type="text" name="subject" placeholder="Subject *" />
+            </div>
+        </div>
+        <div class="col col-m-12 col-t-12 col-d-12 animated">
+            <div class="value">
+                <textarea name="message" placeholder="Message"></textarea>
+            </div>
+        </div>
+        <div class="col col-m-12 col-t-12 col-d-12 animated">
+            <!-- Changed to <button> for proper submission -->
+            <button type="submit" class="btn">Send Message</button>
+        </div>
+    </div>
+</form>
+<div class="alert-success" style="display:none;">Your message has been sent!</div>
 						<div class="alert-success">
 							<p>Thanks, your message is sent successfully. We will contact you shortly!</p>
 						</div>
